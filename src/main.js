@@ -233,6 +233,59 @@ ipcMain.handle("traducir", async (_e, textos) => {
   return salida;
 });
 
+
+// ── conseguir el APK que falta (legal): del móvil o de F-Droid ──────────────
+const APKS_DIR = path.join(BASE, "apks");
+fs.mkdirSync(APKS_DIR, { recursive: true });
+
+ipcMain.handle("apps-instaladas", async (_e, dispositivo) => {
+  const p = spawn("adb", ["-s", dispositivo, "shell", "pm", "list", "packages", "-3", "-f"]);
+  let d = "";
+  p.stdout.on("data", (x) => (d += x));
+  await new Promise((r) => p.on("close", r));
+  return d.split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l.startsWith("package:"))
+    .map((l) => {
+      const [ruta, paquete] = l.replace(/^package:/, "").split("=");
+      return { paquete, ruta };
+    })
+    .sort((a, b) => a.paquete.localeCompare(b.paquete));
+});
+
+ipcMain.handle("extraer-apk", async (_e, { dispositivo, paquete }) => {
+  const salida = [];
+  const p = spawn("adb", ["-s", dispositivo, "shell", "pm", "path", paquete]);
+  let d = "";
+  p.stdout.on("data", (x) => (d += x));
+  await new Promise((r) => p.on("close", r));
+  const rutas = d.split("\n").map((l) => l.replace(/^package:/, "").trim()).filter(Boolean);
+  if (!rutas.length) return { ok: false, error: "el paquete no está instalado o no se puede leer" };
+  const carpeta = path.join(APKS_DIR, paquete);
+  fs.mkdirSync(carpeta, { recursive: true });
+  for (const ruta of rutas) {
+    const destino = path.join(carpeta, path.basename(ruta));
+    const r = await ejecutar("extraer", "adb", ["-s", dispositivo, "pull", ruta, destino]);
+    if (r.codigo === 0 && fs.existsSync(destino)) salida.push(destino);
+  }
+  if (!salida.length) return { ok: false, error: "no se pudo extraer" };
+  return { ok: true, ruta: salida[0], splits: salida.slice(1), carpeta };
+});
+
+// F-Droid: apps libres, descarga legítima.
+function ficheroJson(url) { return json(url); }
+
+ipcMain.handle("fdroid-descargar", async (_e, paquete) => {
+  const info = await ficheroJson(`https://f-droid.org/api/v1/packages/${encodeURIComponent(paquete)}`);
+  const ver = info?.suggestedVersionCode;
+  if (!ver) throw new Error("F-Droid no conoce ese paquete");
+  const destino = path.join(APKS_DIR, `${paquete}_${ver}.apk`);
+  enviar("log", { id: "descarga-apk", texto: `Descargando ${paquete} ${info.suggestedVersionName || ver} de F-Droid…\n` });
+  await descargar(`https://f-droid.org/repo/${paquete}_${ver}.apk`, destino);
+  const st = leerEstado(); st.apk = destino; guardarEstado(st);
+  return { ok: true, ruta: destino, version: info.suggestedVersionName || String(ver) };
+});
+
 ipcMain.handle("abrir-carpeta", (_e, ruta) => shell.openPath(ruta));
 ipcMain.handle("detener", (_e, id) => { const p = procesos.get(id); if (p) p.kill("SIGTERM"); });
 

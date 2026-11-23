@@ -53,3 +53,10 @@ a{color:var(--acento)}
 .detalle ul { margin:6px 0 0; padding-left:16px; display:flex; flex-direction:column; gap:6px; max-height:220px; overflow:auto; }
 .detalle li strong { color:#dbe6f5; font-size:11.5px; }
 .pie-repo { display:flex; align-items:center; justify-content:space-between; margin-top:auto; }
+
+.dlg { padding: 18px; display: flex; flex-direction: column; gap: 10px; width: 560px; max-height: 70vh; }
+.dlg h2 { margin: 0; font-size: 16px; }
+.lista-apps { overflow: auto; display: flex; flex-direction: column; gap: 4px; max-height: 46vh; }
+.app-item { text-align: left; font-size: 12px; padding: 6px 9px; }
+.fila-acciones { display: flex; justify-content: flex-end; gap: 8px; }
+.error { color: var(--rojo); font-size: 12px; min-height: 15px; margin: 0; }

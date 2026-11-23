@@ -176,3 +176,46 @@ $("#btn-detener").addEventListener("click", () => window.patchlab.detener("parch
 $("#link-morphe").addEventListener("click", (e) => { e.preventDefault(); window.patchlab.abrirCarpeta("https://github.com/MorpheApp"); });
 
 refrescar().then(cargarCatalogo);
+
+
+// ── conseguir el APK que falta ──────────────────────────────────────────────
+$("#btn-apk-movil").addEventListener("click", async () => {
+  const disp = $("#sel-dispositivo").value;
+  if (!disp) return alert("conecta el móvil con depuración USB");
+  $("#lista-apps").innerHTML = '<p class="tenue">leyendo apps instaladas…</p>';
+  $("#dlg-apps").showModal();
+  const apps = await window.patchlab.appsInstaladas(disp);
+  const pintar = (filtro = "") => {
+    const lista = apps.filter((a) => a.paquete.toLowerCase().includes(filtro.toLowerCase()));
+    $("#lista-apps").innerHTML = lista.slice(0, 400).map((a) =>
+      `<button class="app-item" data-pkg="${esc(a.paquete)}">${esc(a.paquete)}</button>`).join("");
+    document.querySelectorAll("#lista-apps .app-item").forEach((b) => b.addEventListener("click", async () => {
+      b.textContent = "extrayendo…";
+      const r = await window.patchlab.extraerApk({ dispositivo: disp, paquete: b.dataset.pkg });
+      if (!r.ok) { b.textContent = "error: " + r.error; return; }
+      $("#apk-elegido").textContent = r.ruta.split("/").slice(-1)[0];
+      apk = r.ruta;
+      $("#dlg-apps").close();
+      log("parchear", `\n✓ APK extraído: ${r.ruta}\n`);
+    }));
+  };
+  pintar();
+  $("#buscar-app").oninput = (e) => pintar(e.target.value);
+});
+$("#cerrar-apps").addEventListener("click", () => $("#dlg-apps").close());
+
+$("#btn-apk-fdroid").addEventListener("click", () => { $("#error-fdroid").textContent = ""; $("#dlg-fdroid").showModal(); });
+$("#cerrar-fdroid").addEventListener("click", () => $("#dlg-fdroid").close());
+$("#descargar-fdroid").addEventListener("click", async () => {
+  const pkg = $("#pkg-fdroid").value.trim();
+  if (!pkg) return;
+  $("#error-fdroid").textContent = "descargando…";
+  try {
+    const r = await window.patchlab.fdroidDescargar(pkg);
+    $("#apk-elegido").textContent = r.ruta.split("/").slice(-1)[0];
+    apk = r.ruta;
+    $("#dlg-fdroid").close();
+  } catch (e) {
+    $("#error-fdroid").textContent = e.message;
+  }
+});

@@ -11,7 +11,11 @@ Aplicación de escritorio (Electron) para **parchear APKs con Morphe y probarlas
   número de parches, estrellas y la **lista desplegable de parches con su descripción**.
   Buscador por repo, app o parche, y descarga del `.mpp` de la última release.
 - **Traducción al español** de las descripciones de parches, con un traductor local (Ollama) y caché.
-- **Parchear**: elige el APK (`.apk/.apkm/.xapk/.apks`), los parches y aplica Morphe Desktop.
+- **Parchear**: elige el APK (`.apk/.apkm/.xapk/.apks`) — o consíguelo dentro de la app:
+  - **APK del móvil…**: lista las apps instaladas del dispositivo y **extrae su APK**
+    (`pm path` + `adb pull`), que es tu propia copia con licencia.
+  - **F-Droid…**: descarga el APK de una app libre desde el repositorio de F-Droid.
+  - Después elige los parches y aplica Morphe Desktop.
 - **Probar**: instala el APK parcheado con `adb`, detecta el paquete, lo lanza, hace captura de
   pantalla y saca `logcat` contando `FATAL EXCEPTION`.
 - **Menú en español** y avisos legales integrados.
@@ -42,6 +46,8 @@ npm start                           # o ./start.sh
 ## Aviso legal
 
 - Usa esto **solo con aplicaciones que hayas instalado/comprado tú**.
+- **No descarga APKs de tiendas espejo** (APKMirror/APKPure) para apps propietarias: eso es
+  distribución no autorizada. La app solo extrae tu copia instalada o descarga software libre de F-Droid.
 - **No publiques APKs parcheados**: son software propietario modificado y su distribución infringe derechos de autor.
 - Sí puedes publicar tus propios bundles de parches (`.mpp`) y tus informes de prueba.
 - Morphe Desktop y los parches son proyectos de terceros ([MorpheApp](https://github.com/MorpheApp)).
