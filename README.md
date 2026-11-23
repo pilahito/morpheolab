@@ -7,12 +7,16 @@ Aplicación de escritorio (Electron) para **parchear APKs con Morphe y probarlas
 ## Qué hace
 
 - **Repositorios**: carga el índice de [morphe-patches.software](https://morphe-patches.software/)
-  (610+ bundles de la comunidad), con buscador y descarga del `.mpp` de la última release de cada repo.
+  (610+ bundles de la comunidad) con **icono de cada bundle**, apps objetivo (paquetes),
+  número de parches, estrellas y la **lista desplegable de parches con su descripción**.
+  Buscador por repo, app o parche, y descarga del `.mpp` de la última release.
 - **Traducción al español** de las descripciones de parches, con un traductor local (Ollama) y caché.
 - **Parchear**: elige el APK (`.apk/.apkm/.xapk/.apks`), los parches y aplica Morphe Desktop.
 - **Probar**: instala el APK parcheado con `adb`, detecta el paquete, lo lanza, hace captura de
   pantalla y saca `logcat` contando `FATAL EXCEPTION`.
 - **Menú en español** y avisos legales integrados.
+
+![Repositorios](docs/repositorios.png)
 
 ## Requisitos
 

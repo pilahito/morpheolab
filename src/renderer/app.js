@@ -55,22 +55,47 @@ async function cargarCatalogo() {
   }
 }
 
-function pintarRepos() {
+async function pintarRepos() {
   const q = ($("#buscar-repo").value || "").toLowerCase();
   const filtrados = repos.filter((r) => {
-    const t = `${r.repo} ${r.name || ""} ${(r.patches || []).map((p) => p.name).join(" ")}`.toLowerCase();
+    const t = `${r.repo} ${r.name || ""} ${(r.patches || []).map((p) => p.name).join(" ")} ${(r.targetApps || []).join(" ")}`.toLowerCase();
     return !q || t.includes(q);
   });
   $("#cuenta-repos").textContent = `${filtrados.length} repositorios`;
-  $("#lista-repos").innerHTML = filtrados.slice(0, 300).map((r) => {
-    const nombres = (r.patches || []).map((p) => p.name).slice(0, 6).join(" · ");
+  const caja = $("#lista-repos");
+  caja.innerHTML = filtrados.slice(0, 300).map((r) => {
+    const apps = (r.targetApps || []).slice(0, 3);
+    const parches = (r.patches || []).slice(0, 8);
     return `<div class="repo">
-      <strong>${esc(r.name || r.repo)}</strong>
-      <small>${esc(r.repo)} · ${(r.patches || []).length} parches</small>
-      <div class="patches">${esc(nombres)}</div>
-      <button data-repo="${esc(r.repo)}">Descargar .mpp</button>
+      <div class="repo-cab">
+        <span class="icono" data-img="${esc(r.bundleIconUrl || r.avatarUrl || "")}">?</span>
+        <div class="repo-titulo">
+          <strong>${esc(r.name || r.repo)}</strong>
+          <small>${esc(r.repo)}</small>
+        </div>
+        <span class="pill-mini">${r.patchCount ?? (r.patches || []).length} parches</span>
+      </div>
+      <div class="apps">${apps.map((a) => `<span class="chip" title="${esc(a)}">${esc(a)}</span>`).join("")}${(r.targetApps || []).length > 3 ? `<span class="chip tenue">+${(r.targetApps || []).length - 3}</span>` : ""}</div>
+      <div class="patches">${parches.map((x) => esc(x.name)).join(" · ")}</div>
+      <details class="detalle">
+        <summary>${(r.patches || []).length} parches con descripción</summary>
+        <ul>${(r.patches || []).map((x) => `<li><strong>${esc(x.name)}</strong><br><span class="tenue">${esc(x.description || "")}</span></li>`).join("")}</ul>
+      </details>
+      <div class="pie-repo">
+        <span class="tenue">★ ${r.stars ?? 0}</span>
+        <button data-repo="${esc(r.repo)}">Descargar .mpp</button>
+      </div>
     </div>`;
   }).join("");
+
+  // iconos (bundleIconUrl; si falla, avatar del autor)
+  document.querySelectorAll(".repo-cab .icono[data-img]").forEach(async (span) => {
+    const url = span.dataset.img;
+    if (!url) return;
+    const data = await window.patchlab.imagen(url).catch(() => null);
+    if (data) { span.style.backgroundImage = `url("${data}")`; span.textContent = ""; span.classList.add("con-imagen"); }
+  });
+
   void traducirVisibles();
   document.querySelectorAll("#lista-repos button[data-repo]").forEach((b) => b.addEventListener("click", async () => {
     b.textContent = "descargando…";
@@ -84,18 +109,6 @@ function pintarRepos() {
     }
   }));
 }
-
-async function traducirVisibles() {
-  if (!$("#chk-traducir").checked) return;
-  const nodos = [...document.querySelectorAll(".repo .patches")].slice(0, 24);
-  if (!nodos.length) return;
-  const textos = nodos.map((n) => n.textContent);
-  try {
-    const trad = await window.patchlab.traducir(textos);
-    nodos.forEach((n, i) => { if (trad[i]) n.textContent = trad[i]; });
-  } catch (e) { console.warn("traducción:", e.message); }
-}
-$("#chk-traducir").addEventListener("change", traducirVisibles);
 
 $("#btn-catalogo").addEventListener("click", cargarCatalogo);
 $("#buscar-repo").addEventListener("input", pintarRepos);

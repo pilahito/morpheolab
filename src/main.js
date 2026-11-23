@@ -84,6 +84,38 @@ ipcMain.handle("elegir-apk", async () => {
   return st.apk;
 });
 
+// Descarga una imagen remota y la devuelve como data URL (para mostrarla con CSP estricta).
+const CACHE_IMG = path.join(BASE, "cache-imagenes");
+fs.mkdirSync(CACHE_IMG, { recursive: true });
+function imagenComoDataUrl(url) {
+  return new Promise((resolve) => {
+    if (!/^https?:\/\//.test(url)) return resolve(null);
+    const clave = require("node:crypto").createHash("sha1").update(url).digest("hex");
+    const f = path.join(CACHE_IMG, clave);
+    if (fs.existsSync(f)) {
+      const tipo = url.endsWith(".svg") ? "image/svg+xml" : url.endsWith(".jpg") || url.endsWith(".jpeg") ? "image/jpeg" : "image/png";
+      return resolve(`data:${tipo};base64,${fs.readFileSync(f).toString("base64")}`);
+    }
+    https.get(url, { headers: { "user-agent": "MorpheoLab" } }, (r) => {
+      if (r.statusCode >= 300 && r.statusCode < 400 && r.headers.location) {
+        r.resume();
+        return imagenComoDataUrl(r.headers.location).then(resolve);
+      }
+      if (r.statusCode !== 200) { r.resume(); return resolve(null); }
+      const trozos = [];
+      r.on("data", (d) => trozos.push(d));
+      r.on("end", () => {
+        const datos = Buffer.concat(trozos);
+        if (datos.length > 3 * 1024 * 1024) return resolve(null);
+        fs.writeFileSync(f, datos);
+        const tipo = r.headers["content-type"] || "image/png";
+        resolve(`data:${tipo.split(";")[0]};base64,${datos.toString("base64")}`);
+      });
+    }).on("error", () => resolve(null));
+  });
+}
+ipcMain.handle("imagen", async (_e, url) => imagenComoDataUrl(url));
+
 ipcMain.handle("catalogo", async () => {
   const d = await json("https://morphe-patches.software/data/bundles.json");
   return d.bundles || [];
