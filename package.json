@@ -1,0 +1,17 @@
+{
+  "name": "morpheolab",
+  "productName": "MorpheoLab",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Parchea APKs con Morphe y pruébalas en el móvil, en un solo sitio",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^38.0.0"
+  },
+  "allowScripts": {
+    "electron@38.8.6": true
+  }
+}

@@ -1,0 +1,10 @@
+node_modules/
+bin/*.jar
+bin/*.mpp
+bin/morphe-data/
+bundles/
+salida/
+dist/
+cache-traducciones.json
+estado.json
+*.log

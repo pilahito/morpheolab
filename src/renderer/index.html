@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; script-src 'self'">
+<title>MorpheoLab</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+  <div class="marca"><span class="logo">⌁</span><div><strong>MorpheoLab</strong><small>parchea · prueba · repite</small></div></div>
+  <nav class="tabs">
+    <button class="tab activa" data-vista="bundles">Repositorios</button>
+    <button class="tab" data-vista="parchear">Parchear</button>
+    <button class="tab" data-vista="probar">Probar</button>
+    <button class="tab" data-vista="ajustes">Ajustes</button>
+  </nav>
+  <span id="estado-cab" class="pill">…</span>
+</header>
+
+<main>
+  <section class="vista" id="v-bundles">
+    <div class="barra">
+      <input id="buscar-repo" placeholder="Buscar repositorio o parche…">
+      <button id="btn-catalogo">Actualizar catálogo</button>
+      <label class="check"><input type="checkbox" id="chk-traducir" checked> Traducir al español</label>
+      <span id="cuenta-repos" class="tenue"></span>
+    </div>
+    <div id="lista-repos" class="rejilla"></div>
+  </section>
+
+  <section class="vista oculta" id="v-parchear">
+    <div class="barra">
+      <button id="btn-apk">Elegir APK…</button>
+      <span id="apk-elegido" class="tenue">ningún APK</span>
+      <button id="btn-listar">Ver parches</button>
+      <label class="check"><input type="checkbox" id="chk-unsigned"> sin firmar</label>
+      <button id="btn-parchear" class="principal">Parchear</button>
+      <button id="btn-detener" class="suave">Detener</button>
+    </div>
+    <div class="dos">
+      <div class="panel">
+        <h3>Parches del bundle</h3>
+        <div id="lista-parches" class="lista-checks"></div>
+      </div>
+      <div class="panel">
+        <h3>Consola</h3>
+        <pre id="consola-parchear" class="consola"></pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="vista oculta" id="v-probar">
+    <div class="barra">
+      <select id="sel-dispositivo"></select>
+      <button id="btn-instalar">Instalar APK parcheado</button>
+      <button id="btn-lanzar">Lanzar app</button>
+      <button id="btn-captura">Captura</button>
+      <button id="btn-logcat">Logcat / fallos</button>
+    </div>
+    <div class="dos">
+      <div class="panel">
+        <h3>Pantalla del móvil</h3>
+        <div class="marco"><img id="captura" alt="captura"></div>
+        <p id="info-prueba" class="tenue"></p>
+      </div>
+      <div class="panel">
+        <h3>Logcat</h3>
+        <pre id="consola-probar" class="consola"></pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="vista oculta" id="v-ajustes">
+    <div class="panel">
+      <h3>Entorno</h3>
+      <ul id="entorno" class="lista-entorno"></ul>
+      <p class="tenue">Morphe Desktop es software de terceros (<a href="#" id="link-morphe">MorpheApp</a>). MorpheoLab solo lo orquesta.</p>
+      <p class="aviso">⚠️ Usa esto con apps que hayas comprado/instalado tú. <strong>No publiques APKs parcheados</strong>: son software propietario modificado. Puedes publicar tus propios <code>.mpp</code> y tus informes de prueba.</p>
+    </div>
+  </section>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
